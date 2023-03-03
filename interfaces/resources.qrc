@@ -1,0 +1,23 @@
+<RCC>
+  <qresource prefix="images">
+    <file>../images/logo.png</file>
+  </qresource>
+  <qresource prefix="icons">
+    <file>../images/icons/cil-wifi-signal-off.png</file>
+    <file>../images/icons/cil-dialpad.png</file>
+    <file>../images/icons/cil-dialpad.png</file>
+    <file>../images/icons/cil-map.png</file>
+    <file>../images/icons/cil-gamepad.png</file>
+    <file>../images/icons/cil-terminal.png</file>
+    <file>../images/icons/cil-x.png</file>
+    <file>../images/icons/cil-arrow-bottom.png</file>
+    <file>../images/icons/cil-zoom-in.png</file>
+    <file>../images/icons/cil-zoom-out.png</file>
+    <file>../images/icons/icon_close.png</file>
+    <file>../images/icons/icon_maximize.png</file>
+    <file>../images/icons/icon_menu.png</file>
+    <file>../images/icons/icon_minimize.png</file>
+    <file>../images/icons/icon_restore.png</file>
+    <file>../images/icons/icon_settings.png</file>
+  </qresource>
+</RCC>
