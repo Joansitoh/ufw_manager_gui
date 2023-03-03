@@ -78,6 +78,16 @@ Este proyecto de Python es una aplicación de escritorio con una interfaz gráfi
 - PyQt5
 - UFW instalado y configurado en el servidor remoto
 
+## Capturas de Pantalla 📷
+
+Aquí hay algunas capturas de pantalla de la aplicación en acción:
+
+![Pantalla de Inicio de Sesión](/screenshots/login.png)
+_Pantalla de Inicio de Sesión_
+
+![Aplicación Principal](/screenshots/main.png)
+_Aplicación Principal_
+
 ## Configuración ⚙️
 
 1. Clone el repositorio en su computadora local.
