@@ -1,4 +1,5 @@
 import json
+import os
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -29,6 +30,10 @@ class FileConfig:
 
     @staticmethod
     def saveToConfig(hashmap, path):
+        # If the path doesn't exist, create it
+        if not os.path.exists(os.path.dirname(path)):
+            os.makedirs(os.path.dirname(path))
+
         with open(path, "w") as cache_file:
             json.dump(hashmap, cache_file)
 
@@ -40,6 +45,10 @@ class FileConfig:
         except FileNotFoundError:
             hashmap = {}
         return hashmap
+
+    @staticmethod
+    def getHomePath():
+        return os.path.expanduser("~")
 
 
 class MessageBoxUtils:

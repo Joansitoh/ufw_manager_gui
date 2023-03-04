@@ -46,6 +46,8 @@ class AppUI(QMainWindow):
         # BUTTONS SETUP
         # ///////////////////////////////////////////////////////////////
         self.ui.btn_ports.clicked.connect(self.button_pressed)
+        self.ui.btn_login.clicked.connect(self.button_pressed)
+        self.ui.btn_logout.clicked.connect(self.button_pressed)
         self.push_button(self.ui.btn_login)
 
         self.ui.toggleButton.clicked.connect(lambda: self.toggle_menu())
@@ -71,8 +73,14 @@ class AppUI(QMainWindow):
 
         # BUTTON MAP
         button_map = {
-            "btn_ports": self.ui.ports
+            "btn_ports": self.ui.ports,
+            "btn_login": self.ui.login_profile
         }
+
+        if btnName == "btn_logout":
+            LoginFunctions.logout(self)
+            LOGGED_IN = False
+            return
 
         if btnName in button_map:
             self.ui.widgets.setCurrentWidget(button_map[btnName])
@@ -86,6 +94,7 @@ class AppUI(QMainWindow):
     def start(self):
         self.ufw_handler = UFWHandler(self.ssh_client, self.ui)
         self.push_button(self.ui.btn_ports)
+        self.ui.current_ip.setText(self.ui.host.text())
         global LOGGED_IN
         LOGGED_IN = True
 

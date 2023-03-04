@@ -6,7 +6,7 @@ import os
 
 import paramiko
 
-from . ui_functions import *
+from .ui_functions import *
 
 
 class LoginFunctions(AppUI):
@@ -87,10 +87,39 @@ class LoginFunctions(AppUI):
         self.animation.start()
         self.animation.finished.connect(lambda: LoginFunctions.change_window(self))
 
-    def change_window(self):
-        self.ui.login_frame.hide()
-        self.ui.widgets.setCurrentWidget(self.ui.ports)
-        self.start()
+    def show_login(self):
+        self.animation = QPropertyAnimation(self.ui.login_profile_frame, b"maximumWidth")
+        self.animation.setDuration(300)
+        self.animation.setStartValue(self.ui.login_profile_frame.width())
+        self.animation.setEndValue(0)
+        self.animation.setEasingCurve(QEasingCurve.InOutQuart)
+
+        self.animation.start()
+        self.animation.finished.connect(lambda: LoginFunctions.change_window(self, False))
+
+    def logout(self):
+        # Close SSH connection
+        if self.ssh_client is not None:
+            if self.ssh_client.get_transport().is_active():
+                self.ssh_client.close()
+                print("SSH connection closed")
+
+        self.ufw_handler = None
+        self.ssh_channel = None
+        self.ssh_client = None
+
+        LoginFunctions.show_login(self)
+        pass
+
+    def change_window(self, login=True):
+        if login:
+            self.ui.login_frame.hide()
+            self.ui.widgets.setCurrentWidget(self.ui.ports)
+            self.start()
+        else:
+            self.ui.login_frame.show()
+            self.ui.login_frame.setMaximumWidth(100000)
+            self.ui.widgets.setCurrentWidget(self.ui.login_page)
 
     def can_login(self):
         if self.ui.username.text() == "":
@@ -121,18 +150,12 @@ class LoginFunctions(AppUI):
             "passphrase": pass_crypt
         }
 
-        if not os.path.exists("cache.json"):
-            open("cache.json", "w").close()
-
-        with open("cache.json", "w") as cache_file:
-            json.dump(cache, cache_file)
+        FileConfig.saveToConfig(cache, FileConfig.getHomePath() + "/.ufw_cache.json")
 
     def load_cache_file(self):
-        if not os.path.exists("cache.json"):
+        cache = FileConfig.loadFromConfig(FileConfig.getHomePath() + "/.ufw_cache.json")
+        if cache is None or cache == {}:
             return
-
-        with open("cache.json", "r") as cache_file:
-            cache = json.load(cache_file)
 
         self.ui.host.setText(cache["host"])
         self.ui.username.setText(cache["username"])
