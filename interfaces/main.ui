@@ -1447,7 +1447,7 @@ padding: 10px;
                                </size>
                               </property>
                               <property name="text">
-                               <string>Nombre de usuario:</string>
+                               <string>Username:</string>
                               </property>
                               <property name="scaledContents">
                                <bool>true</bool>
@@ -1466,7 +1466,7 @@ padding: 10px;
                                </size>
                               </property>
                               <property name="text">
-                               <string>Clave privada:</string>
+                               <string>Private key:</string>
                               </property>
                              </widget>
                             </item>

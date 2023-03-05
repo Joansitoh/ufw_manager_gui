@@ -48,7 +48,7 @@ class LoginFunctions(AppUI):
         LoginFunctions.load_cache_file(self)
 
     def open_file(self):
-        file_name = QFileDialog.getOpenFileName(self, 'Open file', '/home')
+        file_name = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\')
         self.ui.ssh_key.setText(file_name[0])
 
     def toggle_passphrase(self, state):
@@ -59,7 +59,7 @@ class LoginFunctions(AppUI):
 
     def login(self):
         if not LoginFunctions.can_login(self):
-            QMessageBox.critical(self, "Error", "Por favor ingrese todos los campos")
+            QMessageBox.critical(self, "Error", "Please, fill all the fields")
             return
 
         host = self.ui.host.text()
@@ -74,12 +74,17 @@ class LoginFunctions(AppUI):
 
         try:
             # AUTHENTICATION
-            private_key = paramiko.RSAKey.from_private_key_file(ssh_key, password=passphrase)
+            private_key = None
+            if ssh_key != "":
+                private_key = paramiko.RSAKey.from_private_key_file(ssh_key, password=passphrase)
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
             try:
-                ssh.connect(host, username=username, pkey=private_key)
+                if private_key is not None:
+                    ssh.connect(host, username=username, pkey=private_key)
+                else:
+                    ssh.connect(host, username=username)
                 channel = ssh.invoke_shell()
                 channel.setblocking(0)
 
@@ -100,7 +105,7 @@ class LoginFunctions(AppUI):
                 raise e
         except Exception as e:
             print(e)
-            QMessageBox.critical(self, "Error", "Error al iniciar sesión")
+            QMessageBox.critical(self, "Error while connecting to the server", e.__str__())
 
     def hide_login(self):
         self.animation = QPropertyAnimation(self.ui.login_frame, b"maximumWidth")
@@ -148,8 +153,6 @@ class LoginFunctions(AppUI):
 
     def can_login(self):
         if self.ui.username.text() == "":
-            return False
-        if self.ui.ssh_key.text() == "":
             return False
         if self.ui.use_passphrase.isChecked():
             if self.ui.passphrase.text() == "":
