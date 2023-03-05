@@ -653,13 +653,6 @@ QComboBox QAbstractItemView{
                </layout>
               </widget>
              </item>
-             <item>
-              <widget class="QLabel" name="label_4">
-               <property name="text">
-                <string>UFW Manager</string>
-               </property>
-              </widget>
-             </item>
             </layout>
            </widget>
           </item>
