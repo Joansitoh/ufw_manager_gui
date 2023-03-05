@@ -56,19 +56,19 @@ To use UFW GUI Manager, you'll need to have the following installed:
 
 Here are some screenshots of UFW GUI Manager in action:
 
-![UFW GUI Manager screenshot 1](/screenshots/login_page.png)
+![UFW GUI Manager screenshot 1](/images/screenshots/login_page.png)
 _Main login page via SSH_
 
-![UFW GUI Manager screenshot 2](/screenshots/login_page_expand.png)
+![UFW GUI Manager screenshot 2](/images/screenshots/login_page_expand.png)
 _Login page with left bar expanded_
 
-![UFW GUI Manager screenshot 3](/screenshots/ports_page.png)
+![UFW GUI Manager screenshot 3](/images/screenshots/ports_page.png)
 _List view of open ports on the remote machine_
 
-![UFW GUI Manager screenshot 4](/screenshots/ports_page_warning.png)
+![UFW GUI Manager screenshot 4](/images/screenshots/ports_page_warning.png)
 _Double confirm for add and delete rules_
 
-![UFW GUI Manager screenshot 5](/screenshots/login_profile.png)
+![UFW GUI Manager screenshot 5](/images/screenshots/login_profile.png)
 _Logout page with current IP_
 
 ## 🤝 Contributing
