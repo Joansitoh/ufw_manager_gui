@@ -27,7 +27,7 @@ To use UFW GUI Manager, you'll need to have the following installed:
 
 1. Clone this repository:
     ```
-    git clone https://github.com/your-username/ufw-gui-manager.git
+    git clone https://github.com/Joansitoh/ufw_manager_gui.git
     ```
 
 2. Install dependencies:
