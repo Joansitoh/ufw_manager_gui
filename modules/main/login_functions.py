@@ -84,7 +84,7 @@ class LoginFunctions(AppUI):
                 if private_key is not None:
                     ssh.connect(host, username=username, pkey=private_key)
                 else:
-                    ssh.connect(host, username=username)
+                    ssh.connect(host, username=username, password=passphrase)
                 channel = ssh.invoke_shell()
                 channel.setblocking(0)
 
@@ -101,7 +101,7 @@ class LoginFunctions(AppUI):
                         # open lost connection window
                         return
 
-                print(e)
+                print("Error", e)
                 raise e
         except Exception as e:
             print(e)
