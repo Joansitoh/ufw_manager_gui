@@ -35,7 +35,7 @@ linux:
     - AppImage
     - snap
     - deb
-  maintainer: electronjs.org
+  maintainer: joansitohprah@gmail.com
   category: Utility
 
 appImage:

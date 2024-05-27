@@ -17,19 +17,6 @@
     "build:mac": "npm run build && electron-builder --mac",
     "build:linux": "npm run build && electron-builder --linux"
   },
-  "build": {
-    "appId": "com.joansiitoh.umg",
-    "productName": "UFW Manager GUI",
-    "win": {
-      "icon": "build/icons/win/icon.ico"
-    },
-    "mac": {
-      "icon": "build/icons/mac/icon.icns"
-    },
-    "linux": {
-      "icon": "build/icons/png"
-    }
-  },
   "dependencies": {
     "@chakra-ui/react": "^2.8.2",
     "@electerm/ssh2": "^1.14.0",
