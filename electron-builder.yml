@@ -11,7 +11,7 @@ files:
 asarUnpack:
   - resources/**
 win:
-  icon: build/icons/win/icon.ico,
+  icon: build/icons/win/icon.ico
   executableName: test
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
