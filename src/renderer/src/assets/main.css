@@ -1,0 +1,6 @@
+@import './base.css';
+
+body {
+  overflow: hidden;
+  user-select: none;
+}
