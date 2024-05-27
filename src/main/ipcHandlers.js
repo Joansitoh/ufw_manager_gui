@@ -1,6 +1,7 @@
 import { Client } from '@electerm/ssh2'
-import { ipcMain, dialog, shell } from 'electron'
-import { readFileSync } from 'fs'
+import { ipcMain, dialog, shell, app } from 'electron'
+import { readFileSync, writeFileSync } from 'fs'
+import { join } from 'path'
 
 let conn
 
@@ -73,6 +74,31 @@ const registerIpcHandlers = () => {
 
   ipcMain.on('open-url', (event, url) => {
     shell.openExternal(url)
+  })
+
+  ipcMain.on('save-credentials', (event, credentials) => {
+    const { host, username, sshKey, sshKeyPath } = credentials
+    const data = {
+      host,
+      username,
+      sshKey,
+      sshKeyPath
+    }
+
+    const storagePath = app.getPath('userData')
+    const storageFile = join(storagePath, 'credentials.json')
+    writeFileSync(storageFile, JSON.stringify(data))
+  })
+
+  ipcMain.on('load-credentials', (event) => {
+    const storagePath = app.getPath('userData')
+    const storageFile = join(storagePath, 'credentials.json')
+    let data = {}
+    try {
+      data = JSON.parse(readFileSync(storageFile, 'utf8'))
+    } catch (err) {}
+
+    event.sender.send('loaded-credentials', data)
   })
 }
 

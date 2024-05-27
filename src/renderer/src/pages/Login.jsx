@@ -1,5 +1,6 @@
 import {
   Button,
+  Checkbox,
   FormControl,
   FormLabel,
   IconButton,
@@ -21,6 +22,7 @@ const Login = () => {
   const [password, setPassword] = useState('')
   const [sshKeyPath, setSSHKeyPath] = useState('')
   const [useSSHKey, setUseSSHKey] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
   const [loggingIn, setLoggingIn] = useState(false)
 
   const selectFile = () => {
@@ -29,17 +31,46 @@ const Login = () => {
 
   useEffect(() => {
     window.electron.ipcRenderer.on('selected-file', (event, path) => {
-      setSSHKeyPath(event)
+      setSSHKeyPath(path)
+    })
+
+    window.electron.ipcRenderer.send('load-credentials')
+    window.electron.ipcRenderer.once('loaded-credentials', (event, credentials) => {
+      if (credentials.host) {
+        setHost(credentials.host)
+        setRememberMe(true)
+      }
+      if (credentials.username) {
+        setUsername(credentials.username)
+      }
+      if (credentials.sshKeyPath) {
+        setSSHKeyPath(credentials.sshKeyPath)
+      }
+      if (credentials.sshKey) {
+        setUseSSHKey(credentials.sshKey)
+      }
     })
 
     // Limpiar al desmontar
     return () => {
       window.electron.ipcRenderer.removeAllListeners('selected-file')
+      window.electron.ipcRenderer.removeAllListeners('loaded-credentials')
     }
   }, [])
 
   const handleLogin = async () => {
     setLoggingIn(true)
+
+    if (rememberMe) {
+      // Guardar en el almacenamiento
+      window.electron.ipcRenderer.send('save-credentials', {
+        host: host,
+        username: username,
+        sshKey: useSSHKey,
+        sshKeyPath: sshKeyPath
+      })
+    }
+
     try {
       const sshConfig = {
         host: host,
@@ -103,70 +134,91 @@ const Login = () => {
           <h1 className="text-white text-3xl text-center font-bold">UFW MANAGER GUI</h1>
         </div>
         <div className="flex flex-col justify-center px-10 py-24 w-2/3">
-          <FormControl mb={4}>
-            <FormLabel fontSize="sm">Host</FormLabel>
-            <Input
-              type="text"
-              fontSize="sm"
-              variant="filled"
-              placeholder="Host"
-              disabled={loggingIn}
-              onChange={(e) => setHost(e.target.value)}
-              value={host}
-            />
-          </FormControl>
-          <FormControl mb={4}>
-            <FormLabel fontSize="sm">Username</FormLabel>
-            <Input
-              type="text"
-              fontSize="sm"
-              variant="filled"
-              placeholder="Username"
-              disabled={loggingIn}
-              onChange={(e) => setUsername(e.target.value)}
-              value={username}
-            />
-          </FormControl>
-          <FormControl mb={4} className="flex gap-2">
-            <Switch onChange={(e) => setUseSSHKey(e.target.checked)} />
-            <FormLabel fontSize="sm">Use SSH Key</FormLabel>
-          </FormControl>
-          <FormControl mb={4} isDisabled={!useSSHKey}>
-            <FormLabel fontSize="sm">SSH Key Path</FormLabel>
-            <div className="flex gap-2">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              handleLogin()
+            }}
+          >
+            <FormControl mb={4} isRequired>
+              <FormLabel fontSize="sm">Host</FormLabel>
               <Input
                 type="text"
                 fontSize="sm"
                 variant="filled"
-                placeholder="Key path"
-                isDisabled={loggingIn || !useSSHKey}
-                onChange={(e) => setSSHKeyPath(e.target.value)}
-                value={sshKeyPath}
+                placeholder="Host (e.g. localhost:22)"
+                disabled={loggingIn}
+                onChange={(e) => setHost(e.target.value)}
+                value={host}
               />
-              <IconButton
-                icon={<BsFolder />}
-                isDisabled={loggingIn || !useSSHKey}
-                onClick={selectFile}
+            </FormControl>
+            <FormControl mb={4} isRequired>
+              <FormLabel fontSize="sm">Username</FormLabel>
+              <Input
+                type="text"
+                fontSize="sm"
+                variant="filled"
+                placeholder="Username"
+                disabled={loggingIn}
+                onChange={(e) => setUsername(e.target.value)}
+                value={username}
               />
+            </FormControl>
+            <FormControl mb={4} className="flex gap-2">
+              <Switch onChange={(e) => setUseSSHKey(e.target.checked)} isChecked={useSSHKey} />
+              <FormLabel fontSize="sm">Use SSH Key</FormLabel>
+            </FormControl>
+            <FormControl mb={4} isDisabled={!useSSHKey} isRequired={useSSHKey}>
+              <FormLabel fontSize="sm">SSH Key Path</FormLabel>
+              <div className="flex gap-2">
+                <Input
+                  type="text"
+                  fontSize="sm"
+                  variant="filled"
+                  placeholder="Key path"
+                  isDisabled={loggingIn || !useSSHKey}
+                  onChange={(e) => setSSHKeyPath(e.target.value)}
+                  value={sshKeyPath}
+                />
+                <IconButton
+                  icon={<BsFolder />}
+                  isDisabled={loggingIn || !useSSHKey}
+                  onClick={selectFile}
+                />
+              </div>
+            </FormControl>
+            <FormControl mb={4}>
+              <FormLabel fontSize="sm">
+                <span>{useSSHKey ? 'Key Passphrase' : 'Password'}</span>
+              </FormLabel>
+              <Input
+                type="password"
+                fontSize="sm"
+                variant="filled"
+                placeholder="Password"
+                disabled={loggingIn}
+                onChange={(e) => setPassword(e.target.value)}
+                value={password}
+              />
+            </FormControl>
+            <div className="flex gap-2 items-center">
+              <Button colorScheme="blue" isLoading={loggingIn} type="submit">
+                Login
+              </Button>
+              <div className="flex flex-col">
+                <Checkbox
+                  rounded="lg"
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  isChecked={rememberMe}
+                >
+                  Remember me
+                </Checkbox>
+                <p className="text-sm text-gray-400">
+                  This option saves the host, username and ssh key path.
+                </p>
+              </div>
             </div>
-          </FormControl>
-          <FormControl mb={4}>
-            <FormLabel fontSize="sm">
-              <span>{useSSHKey ? 'Key Passphrase' : 'Password'}</span>
-            </FormLabel>
-            <Input
-              type="password"
-              fontSize="sm"
-              variant="filled"
-              placeholder="Password"
-              disabled={loggingIn}
-              onChange={(e) => setPassword(e.target.value)}
-              value={password}
-            />
-          </FormControl>
-          <Button colorScheme="blue" isLoading={loggingIn} onClick={handleLogin}>
-            Login
-          </Button>
+          </form>
         </div>
       </div>
     </div>

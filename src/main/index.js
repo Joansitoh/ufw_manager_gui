@@ -9,7 +9,9 @@ function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 750,
-    resizable: false,
+    minHeight: 400,
+    minWidth: 600,
+    resizable: true,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -42,7 +44,7 @@ function createWindow() {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   // Set app user model id for windows
-  electronApp.setAppUserModelId('com.electron')
+  electronApp.setAppUserModelId('com.joansiitoh.umg')
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.

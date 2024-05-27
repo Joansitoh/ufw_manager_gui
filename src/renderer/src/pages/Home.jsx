@@ -9,11 +9,20 @@ import {
   Badge,
   Box,
   Button,
+  ButtonGroup,
   IconButton,
   Menu,
   MenuButton,
   MenuItem,
   MenuList,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverCloseButton,
+  PopoverContent,
+  PopoverFooter,
+  PopoverHeader,
+  PopoverTrigger,
   Skeleton,
   Tooltip,
   useDisclosure,
@@ -60,14 +69,29 @@ const UFWActionButton = ({
   if (!installed) {
     return (
       <Tooltip label="Install UFW">
-        <IconButton
-          isLoading={installing}
-          icon={<FaDownload />}
-          colorScheme="green"
-          onClick={handleInstall}
-        >
-          Install
-        </IconButton>
+        <Popover placement="bottom" closeOnBlur={false} defaultIsOpen colorScheme="gray">
+          <PopoverTrigger>
+            <IconButton
+              isLoading={installing}
+              icon={<FaDownload />}
+              colorScheme="green"
+              onClick={handleInstall}
+            >
+              Install
+            </IconButton>
+          </PopoverTrigger>
+          <PopoverContent color="white" bg="blue.800" borderColor="blue.800">
+            <PopoverHeader pt={4} fontWeight="bold" border="0">
+              Install your firewall
+            </PopoverHeader>
+            <PopoverArrow bg="blue.800" />
+            <PopoverCloseButton />
+            <PopoverBody>
+              We noticed that you don't have UFW installed. Click the button below to install it.
+              You can also enable it after installing it.
+            </PopoverBody>
+          </PopoverContent>
+        </Popover>
       </Tooltip>
     )
   }
@@ -181,6 +205,7 @@ function Home() {
         if (!firstLoad) setFirstLoad(true)
       })
       .catch((error) => {
+        if (!firstLoad) setFirstLoad(true)
         setInstalled(false)
       })
   }

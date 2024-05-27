@@ -35,6 +35,17 @@ const FirewallSetDrawer = ({ isOpen, onClose }) => {
   const [rule, setRule] = useState('')
 
   const handleAddRule = () => {
+    if (simpleMode && !from && !to && !port) {
+      toast({
+        title: 'Error',
+        description: 'Please fill all the fields',
+        status: 'error',
+        duration: 3000,
+        isClosable: true
+      })
+      return
+    }
+
     const command = buildRule({
       action: action,
       from: from,
@@ -46,8 +57,13 @@ const FirewallSetDrawer = ({ isOpen, onClose }) => {
     onClose()
 
     const addRulePromise = () => {
+      const tempRule = { temp: true }
+      useStorage.getState().addRule(tempRule)
+
       return new Promise((resolve, reject) => {
         Firewall.execute(command).then((result) => {
+          useStorage.getState().deleteRule(tempRule)
+
           if (result?.data.includes('Skipping')) {
             reject('Rule already exists')
           } else {

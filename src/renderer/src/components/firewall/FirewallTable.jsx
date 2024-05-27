@@ -1,5 +1,8 @@
 import {
+  Badge,
   IconButton,
+  Progress,
+  Skeleton,
   Table,
   TableContainer,
   Tbody,
@@ -90,24 +93,68 @@ const FirewallTable = () => {
             </Tr>
           </Thead>
           <Tbody>
-            {rules.map((rule, index) => (
-              <Tr key={index}>
-                <Td>{rule.action}</Td>
-                <Td>{rule.from}</Td>
-                <Td>{rule.to}</Td>
-                <Td isNumeric>{rule.port}</Td>
-                <Td>{rule.protocol}</Td>
-                <Td>
-                  <IconButton
-                    icon={<BiTrash />}
-                    onClick={() => {
-                      setSelectedRule(rule)
-                      onOpen()
-                    }}
-                  />
-                </Td>
-              </Tr>
-            ))}
+            {rules.map((rule, index) => {
+              const colorScheme = rule.action === 'allow' ? 'green' : 'red'
+
+              const ActionBadge = () => (
+                <Badge colorScheme={colorScheme} variant="solid">
+                  {rule.action}
+                </Badge>
+              )
+
+              return (
+                <>
+                  <Tr key={index}>
+                    {rule.temp ? (
+                      <>
+                        <Td>
+                          <Skeleton height="20px" width="40px" />
+                        </Td>
+                        <Td>
+                          <Skeleton height="20px" width="100px" />
+                        </Td>
+                        <Td>
+                          <Skeleton height="20px" width="100px" />
+                        </Td>
+                        <Td isNumeric>
+                          <Skeleton height="20px" width="30px" />
+                        </Td>
+                        <Td>
+                          <Skeleton height="20px" width="30px" />
+                        </Td>
+                        <Td></Td>
+                      </>
+                    ) : (
+                      <>
+                        <Td>
+                          <ActionBadge />
+                        </Td>
+                        <Td>{rule.from}</Td>
+                        <Td>{rule.to}</Td>
+                        <Td isNumeric>{rule.port}</Td>
+                        <Td>{rule.protocol}</Td>
+                        <Td>
+                          <IconButton
+                            icon={<BiTrash />}
+                            onClick={() => {
+                              setSelectedRule(rule)
+                              onOpen()
+                            }}
+                          />
+                        </Td>
+                      </>
+                    )}
+                  </Tr>
+                  {rule.remove && (
+                    <Tr p={0} m={0}>
+                      <Td colSpan={6} p={0} m={0}>
+                        <Progress size="xs" isIndeterminate colorScheme="red" />
+                      </Td>
+                    </Tr>
+                  )}
+                </>
+              )
+            })}
           </Tbody>
         </Table>
       </TableContainer>

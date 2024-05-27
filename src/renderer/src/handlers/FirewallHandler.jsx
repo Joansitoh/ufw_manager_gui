@@ -24,13 +24,13 @@ class Firewall {
   static execute(command) {
     return new Promise((resolve, reject) => {
       const uuid = uuidv4()
-      const listener = (event) => {
+      const listener = (event, data) => {
         window.electron.ipcRenderer.removeListener(uuid, listener)
-        if (event.code !== 0) reject(event)
-        else resolve(event)
+        if (data.code !== 0) reject(data)
+        else resolve(data)
       }
 
-      window.electron.ipcRenderer.on(uuid, listener)
+      window.electron.ipcRenderer.once(uuid, listener)
       window.electron.ipcRenderer.send('execute-ssh', { command, uuid })
     })
   }

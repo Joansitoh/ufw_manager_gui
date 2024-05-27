@@ -25,8 +25,11 @@ const FirewallRemoveDialog = ({ isOpen, onClose, rule }) => {
     onClose()
 
     const delRulePromise = () => {
+      rule.remove = true
+
       return new Promise((resolve, reject) => {
         Firewall.execute(command).then((result) => {
+          rule.remove = false
           if (result?.data.includes('Skipping')) {
             reject('Rule does not exist')
           } else {
