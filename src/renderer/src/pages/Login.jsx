@@ -29,7 +29,7 @@ const Login = () => {
 
   useEffect(() => {
     window.electron.ipcRenderer.on('selected-file', (event, path) => {
-      setSSHKeyPath(path)
+      setSSHKeyPath(event)
     })
 
     // Limpiar al desmontar
