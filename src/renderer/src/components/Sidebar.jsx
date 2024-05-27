@@ -1,27 +1,27 @@
-import { Button } from "@chakra-ui/react";
-import { motion } from "framer-motion";
-import { BiChart, BiSupport, BiTable } from "react-icons/bi";
-import { BsGithub } from "react-icons/bs";
-import { useStorage } from "../handlers/StorageHandler";
+import { Button } from '@chakra-ui/react'
+import { motion } from 'framer-motion'
+import { BiChart, BiSupport, BiTable } from 'react-icons/bi'
+import { BsGithub } from 'react-icons/bs'
+import { useStorage } from '../handlers/StorageHandler'
 
-import logo from "../assets/logo.png";
+import logo from '../assets/logo.png'
 
 const Link = ({ title, icon, path }) => {
-  const currentPage = useStorage((state) => state.page);
+  const currentPage = useStorage((state) => state.page)
 
   return (
     <motion.div
       onClick={() => useStorage.getState().setPage(path)}
       className={
-        "flex gap-2 items-center rounded-lg px-3 py-2 cursor-pointer transition-all hover:bg-zinc-700 " +
-        (currentPage == path ? "bg-zinc-700 pl-4" : "bg-zinc-900")
+        'flex gap-2 items-center rounded-lg px-3 py-2 cursor-pointer transition-all hover:bg-zinc-700 ' +
+        (currentPage == path ? 'bg-zinc-700 pl-4' : 'bg-zinc-900')
       }
     >
       {icon}
       <h2 className="text-white text-md">{title}</h2>
     </motion.div>
-  );
-};
+  )
+}
 
 const Sidebar = () => {
   return (
@@ -46,8 +46,7 @@ const Sidebar = () => {
           <div className="flex flex-col mb-14">
             <h1 className="font-bold text-xl">Support us</h1>
             <p className="text-sm text-gray-400">
-              If you found bugs or want to request features, please let us know
-              on our GitHub page.
+              If you found bugs or want to request features, please let us know on our GitHub page.
             </p>
           </div>
           <Button
@@ -55,10 +54,7 @@ const Sidebar = () => {
             size="sm"
             leftIcon={<BsGithub />}
             onClick={() =>
-              window.electron.ipcRenderer.send(
-                "open-url",
-                "https://github.com/Joansitoh/",
-              )
+              window.electron.ipcRenderer.send('open-url', 'https://github.com/Joansitoh/')
             }
           >
             GitHub
@@ -66,7 +62,7 @@ const Sidebar = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Sidebar;
+export default Sidebar

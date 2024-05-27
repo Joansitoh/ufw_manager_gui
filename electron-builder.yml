@@ -2,7 +2,6 @@ appId: com.joansiitoh.umg
 productName: UFW Manager GUI
 directories:
   buildResources: build
-icon: build/icon.png
 files:
   - '!**/.vscode/*'
   - '!src/*'
@@ -12,8 +11,8 @@ files:
 asarUnpack:
   - resources/**
 win:
+  icon: build/icons/win/icon.ico,
   executableName: test
-  icon: build/icon.ico
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
@@ -21,6 +20,7 @@ nsis:
   createDesktopShortcut: always
 mac:
   entitlementsInherit: build/entitlements.mac.plist
+  icon: build/icons/mac/icon.icns,
   extendInfo:
     - NSCameraUsageDescription: Application requests access to the device's camera.
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
@@ -30,13 +30,13 @@ mac:
 dmg:
   artifactName: ${name}-${version}.${ext}
 linux:
+  icon: build/icons/png
   target:
     - AppImage
     - snap
     - deb
   maintainer: electronjs.org
   category: Utility
-  icon: build/icon.png
 
 appImage:
   artifactName: ${name}-${version}.${ext}

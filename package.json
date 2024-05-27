@@ -1,6 +1,6 @@
 {
   "name": "ufw-manager-gui",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A GUI for managing UFW (Uncomplicated Firewall) on Linux",
   "main": "./out/main/index.js",
   "author": "joansitohprah@gmail.com",
@@ -16,6 +16,19 @@
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "npm run build && electron-builder --mac",
     "build:linux": "npm run build && electron-builder --linux"
+  },
+  "build": {
+    "appId": "com.joansiitoh.umg",
+    "productName": "UFW Manager GUI",
+    "win": {
+      "icon": "build/icons/win/icon.ico"
+    },
+    "mac": {
+      "icon": "build/icons/mac/icon.icns"
+    },
+    "linux": {
+      "icon": "build/icons/png"
+    }
   },
   "dependencies": {
     "@chakra-ui/react": "^2.8.2",
