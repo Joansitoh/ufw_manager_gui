@@ -9,7 +9,6 @@ import {
   Badge,
   Box,
   Button,
-  ButtonGroup,
   IconButton,
   Menu,
   MenuButton,
@@ -20,7 +19,6 @@ import {
   PopoverBody,
   PopoverCloseButton,
   PopoverContent,
-  PopoverFooter,
   PopoverHeader,
   PopoverTrigger,
   Skeleton,
@@ -28,7 +26,7 @@ import {
   useDisclosure,
   useToast
 } from '@chakra-ui/react'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { BiShield } from 'react-icons/bi'
 import { FaArrowLeft, FaDownload, FaPlus, FaServer, FaTrash } from 'react-icons/fa'
 import { FiSettings } from 'react-icons/fi'
@@ -62,6 +60,23 @@ const UFWActionButton = ({
   enabling,
   disabling
 }) => {
+  const [showPopover, setShowPopover] = useState(true);
+
+  useEffect(() => {
+    // Check if the user has seen the popup before
+    const hasSeenPopup = localStorage.getItem('hasSeenUFWInstallPopup');
+    if (hasSeenPopup === 'true') {
+      setShowPopover(false);
+    }
+  }, []);
+
+  const handleInstallClick = () => {
+    // Mark that the user has seen the popup
+    localStorage.setItem('hasSeenUFWInstallPopup', 'true');
+    setShowPopover(false);
+    handleInstall();
+  };
+
   if (!firstLoad) {
     return <Skeleton height="40px" width="40px" rounded="md" />
   }
@@ -69,29 +84,43 @@ const UFWActionButton = ({
   if (!installed) {
     return (
       <Tooltip label="Install UFW">
-        <Popover placement="bottom" closeOnBlur={false} defaultIsOpen colorScheme="gray">
-          <PopoverTrigger>
-            <IconButton
-              isLoading={installing}
-              icon={<FaDownload />}
-              colorScheme="green"
-              onClick={handleInstall}
-            >
-              Install
-            </IconButton>
-          </PopoverTrigger>
-          <PopoverContent color="white" bg="blue.800" borderColor="blue.800">
-            <PopoverHeader pt={4} fontWeight="bold" border="0">
-              Install your firewall
-            </PopoverHeader>
-            <PopoverArrow bg="blue.800" />
-            <PopoverCloseButton />
-            <PopoverBody>
-              We noticed that you don't have UFW installed. Click the button below to install it.
-              You can also enable it after installing it.
-            </PopoverBody>
-          </PopoverContent>
-        </Popover>
+        {showPopover ? (
+          <Popover placement="bottom" closeOnBlur={false} defaultIsOpen colorScheme="gray">
+            <PopoverTrigger>
+              <IconButton
+                isLoading={installing}
+                icon={<FaDownload />}
+                colorScheme="green"
+                onClick={handleInstallClick}
+              >
+                Install
+              </IconButton>
+            </PopoverTrigger>
+            <PopoverContent color="white" bg="blue.800" borderColor="blue.800">
+              <PopoverHeader pt={4} fontWeight="bold" border="0">
+                Install your firewall
+              </PopoverHeader>
+              <PopoverArrow bg="blue.800" />
+              <PopoverCloseButton onClick={() => {
+                localStorage.setItem('hasSeenUFWInstallPopup', 'true');
+                setShowPopover(false);
+              }} />
+              <PopoverBody>
+                We noticed that you don't have UFW installed. Click the button below to install it.
+                You can also enable it after installing it.
+              </PopoverBody>
+            </PopoverContent>
+          </Popover>
+        ) : (
+          <IconButton
+            isLoading={installing}
+            icon={<FaDownload />}
+            colorScheme="green"
+            onClick={handleInstall}
+          >
+            Install
+          </IconButton>
+        )}
       </Tooltip>
     )
   }
@@ -161,6 +190,8 @@ const UFWActionButton = ({
 function Home() {
   const toast = useToast()
   const currentPage = useStorage((state) => state.page)
+  const activeHost = useStorage((state) => state.activeHost)
+  const hosts = useStorage((state) => state.hosts)
 
   const [firstLoad, setFirstLoad] = useState(false)
   const [installed, setInstalled] = useState(false)
@@ -172,17 +203,22 @@ function Home() {
   const { isOpen, onOpen, onClose } = useDisclosure()
 
   const fetchUserRules = () => {
+    if (!activeHost) return;
+
     Firewall.execute('sudo cat /etc/ufw/user.rules')
       .then((result) => {
         const ruleList = Firewall.parse(result.data) || []
         useStorage.getState().setRules(ruleList)
       })
-      .catch((error) => {})
+      .catch((error) => { })
   }
 
   useEffect(() => {
-    fetchUserRules()
-  }, [])
+    if (activeHost) {
+      fetchUserRules()
+      checkUFWStatus()
+    }
+  }, [activeHost])
 
   const Content = () => {
     switch (currentPage) {
@@ -194,10 +230,14 @@ function Home() {
   }
 
   useEffect(() => {
-    checkUFWStatus()
-  }, [])
+    if (activeHost) {
+      checkUFWStatus()
+    }
+  }, [activeHost])
 
   const checkUFWStatus = () => {
+    if (!activeHost) return;
+
     Firewall.execute('sudo ufw status')
       .then((result) => {
         setInstalled(true)
@@ -312,51 +352,73 @@ function Home() {
     toast.closeAll()
   }
 
+  // Get the active host information
+  const activeHostInfo = useCallback(() => {
+    return activeHost ? hosts.find(h => h.id === activeHost) : null;
+  }, [activeHost, hosts]);
+
   return (
     <div className="flex h-screen w-full bg-zinc-800">
       <FirewallSetDrawer isOpen={isOpen} onClose={onClose} />
       <Sidebar />
       <div className="flex flex-col flex-1">
-        <div className="h-24 px-4 py-5 w-full border-b flex items-center justify-between">
+        <div className="h-24 min-h-24 px-4 py-5 w-full border-b flex items-center justify-between">
           <div className="flex items-center gap-2 h-full">
-            <Button as={Box} leftIcon={<FaServer />} className="flex items-center gap-1">
-              <p>UFW STATUS: </p>
-              <UFWStatusBadge firstLoad={firstLoad} installed={installed} enabled={enabled} />
-            </Button>
-            <UFWActionButton
-              firstLoad={firstLoad}
-              installed={installed}
-              enabled={enabled}
-              handleDisable={handleDisable}
-              handleEnable={handleEnable}
-              handleInstall={handleInstall}
-              installing={installing}
-              enabling={enabling}
-              disabling={disabling}
-            />
+            {activeHostInfo() ? (
+              <>
+                <Button as={Box} leftIcon={<FaServer />} className="flex items-center gap-1">
+                  <p>UFW STATUS: </p>
+                  <UFWStatusBadge firstLoad={firstLoad} installed={installed} enabled={enabled} />
+                </Button>
+                <UFWActionButton
+                  firstLoad={firstLoad}
+                  installed={installed}
+                  enabled={enabled}
+                  handleDisable={handleDisable}
+                  handleEnable={handleEnable}
+                  handleInstall={handleInstall}
+                  installing={installing}
+                  enabling={enabling}
+                  disabling={disabling}
+                />
+              </>
+            ) : (
+              <div className="text-white">
+                No active host. Please add a host from the sidebar.
+              </div>
+            )}
           </div>
           <div className="flex gap-2 h-full items-center">
-            <Button colorScheme="green" leftIcon={<FaPlus />} onClick={onOpen}>
-              Add Rule
-            </Button>
-            <Menu>
-              <MenuButton as={Button} colorScheme="gray" leftIcon={<FiSettings />}>
-                Options
-              </MenuButton>
-              <MenuList>
-                <MenuItem icon={<FaTrash />} onClick={handleDeleteAllRules}>
-                  Delete all rules
-                </MenuItem>
-                <MenuItem icon={<FaArrowLeft />} onClick={handleLogout}>
-                  Logout
-                </MenuItem>
-              </MenuList>
-            </Menu>
+            {activeHostInfo() && (
+              <>
+                <Button colorScheme="green" leftIcon={<FaPlus />} onClick={onOpen}>
+                  Add Rule
+                </Button>
+                <Menu>
+                  <MenuButton as={Button} colorScheme="gray" leftIcon={<FiSettings />}>
+                    Options
+                  </MenuButton>
+                  <MenuList>
+                    <MenuItem icon={<FaTrash />} onClick={handleDeleteAllRules}>
+                      Delete all rules
+                    </MenuItem>
+                    <MenuItem icon={<FaArrowLeft />} onClick={handleLogout}>
+                      Logout
+                    </MenuItem>
+                  </MenuList>
+                </Menu>
+              </>
+            )}
           </div>
         </div>
         <div className="px-4 py-5">
           <div className="bg-zinc-900 rounded-lg">
-            <Content />
+            {activeHostInfo() ? <Content /> : (
+              <div className="p-10 text-center text-gray-400">
+                <p className="text-xl mb-2">No active host</p>
+                <p>Please add and select a host from the sidebar to manage firewall rules.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

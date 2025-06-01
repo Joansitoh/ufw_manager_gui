@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
+import { useStorage } from './StorageHandler'
 
 class Firewall {
   static parse(firewallTable) {
@@ -21,7 +22,7 @@ class Firewall {
     return rules
   }
 
-  static execute(command) {
+  static execute(command, hostId = null) {
     return new Promise((resolve, reject) => {
       const uuid = uuidv4()
       const listener = (event, data) => {
@@ -30,8 +31,11 @@ class Firewall {
         else resolve(data)
       }
 
+      // If no hostId is provided, use the active host from storage
+      const activeHostId = hostId || useStorage.getState().activeHost;
+
       window.electron.ipcRenderer.once(uuid, listener)
-      window.electron.ipcRenderer.send('execute-ssh', { command, uuid })
+      window.electron.ipcRenderer.send('execute-ssh', { command, uuid, hostId: activeHostId })
     })
   }
 }

@@ -3,7 +3,9 @@ import { ipcMain, dialog, shell, app } from 'electron'
 import { readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 
-let conn
+// Store for multiple connections
+let connections = new Map();
+let conn; // Keep for backward compatibility
 
 const registerIpcHandlers = () => {
   ipcMain.on('connect-ssh', (event, sshConfig) => {
@@ -25,16 +27,62 @@ const registerIpcHandlers = () => {
       })
   })
 
+  // Handler for additional SSH connections
+  ipcMain.on('connect-additional-ssh', (event, sshConfig) => {
+    const newConn = new Client();
+    const id = sshConfig.id;
+
+    console.log(`Attempting to connect to ${sshConfig.host} with ID ${id}`);
+
+    newConn
+      .on('ready', () => {
+        console.log(`Connection established for ID ${id}`);
+        connections.set(id, newConn);
+        event.sender.send(`ssh-ready-${id}`);
+      })
+      .on('error', (err) => {
+        console.error(`Connection error for ID ${id}:`, err);
+        event.sender.send(`ssh-error-${id}`, err.message);
+      })
+      .connect({
+        host: sshConfig.host,
+        port: sshConfig.host.includes(':') ? parseInt(sshConfig.host.split(':')[1]) : 22,
+        username: sshConfig.username,
+        password: sshConfig.sshKey ? undefined : sshConfig.password,
+        privateKey: sshConfig.sshKey ? readFileSync(sshConfig.sshKeyPath, 'utf8') : undefined,
+        passphrase: sshConfig.sshKey ? sshConfig.password : undefined,
+        readyTimeout: 30000, // Increase timeout to 30 seconds
+        keepaliveInterval: 10000 // Send keepalive every 10 seconds
+      });
+  });
+
+  // Disconnect a specific host
+  ipcMain.on('disconnect-host', (event, hostId) => {
+    if (connections.has(hostId)) {
+      connections.get(hostId).end();
+      connections.delete(hostId);
+    }
+  });
+
   ipcMain.on('disconnect-ssh', (event) => {
     if (conn) {
       conn.end()
       conn = undefined
     }
+    
+    // Close all connections
+    for (const connection of connections.values()) {
+      connection.end();
+    }
+    connections.clear();
   })
 
-  ipcMain.on('execute-ssh', (event, { command, uuid }) => {
-    if (conn) {
-      conn.exec(command, (err, stream) => {
+  ipcMain.on('execute-ssh', (event, { command, uuid, hostId }) => {
+    // If hostId is provided, use that specific connection
+    const connection = hostId && connections.has(hostId) ? connections.get(hostId) : conn;
+    
+    if (connection) {
+      connection.exec(command, (err, stream) => {
         if (err) {
           event.sender.send(uuid, { error: err.message })
           return
@@ -106,6 +154,12 @@ const closeConnection = () => {
   if (conn) {
     conn.end()
   }
+  
+  // Close all connections
+  for (const connection of connections.values()) {
+    connection.end();
+  }
+  connections.clear();
 }
 
 export { registerIpcHandlers, closeConnection }

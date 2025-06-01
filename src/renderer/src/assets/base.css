@@ -69,3 +69,27 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+
+/* Custom scrollbar minimalist */
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+/* Scrollbar Track */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Scrollbar Thumb */
+::-webkit-scrollbar-thumb {
+  background: var(--ev-c-gray-3);
+}
+
+/* Scrollbar Thumb (Hover) */
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ev-c-gray-2);
+}
