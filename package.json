@@ -1,6 +1,6 @@
 {
   "name": "ufw-manager-gui",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A GUI for managing UFW (Uncomplicated Firewall) on Linux",
   "main": "./out/main/index.js",
   "author": "joansitohprah@gmail.com",
@@ -20,7 +20,6 @@
   "dependencies": {
     "@chakra-ui/react": "^2.8.2",
     "@electerm/ssh2": "^1.14.0",
-    "@electron-toolkit/preload": "^3.0.0",
     "@electron-toolkit/utils": "^3.0.0",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
@@ -35,14 +34,13 @@
     "@vitejs/plugin-react": "^4.2.1",
     "electron": "^28.2.0",
     "electron-builder": "^24.9.1",
-    "electron-ssh2": "^0.1.2",
-    "electron-vite": "^2.0.0",
+    "electron-vite": "^3.1.0",
     "eslint": "^8.56.0",
     "eslint-plugin-react": "^7.33.2",
     "prettier": "^3.2.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "tailwindcss": "^3.4.3",
-    "vite": "^5.0.12"
+    "vite": "^6.3.5"
   }
 }
